@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/exams")
-@CrossOrigin(origins = {"http://localhost:5173","https://your-app-name.onrender.com"}) // Connects to your React app
+@CrossOrigin(origins = {"http://localhost:5173","https://your-app-name.onrender.com","https://exam-portal-client.onrender.com"}) // Connects to your React app
 public class ExamController {
 
     @Autowired
