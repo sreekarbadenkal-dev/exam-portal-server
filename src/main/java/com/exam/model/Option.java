@@ -17,4 +17,8 @@ public class Option {
 
     @JsonProperty("text")
     private String text;
+    
+    @ManyToOne
+    @JoinColumn(name = "question_id") 
+    private Question question;
 }
