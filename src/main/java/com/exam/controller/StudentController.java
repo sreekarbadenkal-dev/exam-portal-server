@@ -17,7 +17,7 @@ import com.exam.repository.StudentRepository;
 
 @RestController
 @RequestMapping("/api/studentlogin")
-@CrossOrigin(origins="http://localhost:5173")
+@CrossOrigin(origins={"http://localhost:5173","https://exam-portal-server-5gpy.onrender.com"})
 public class StudentController {
 	
 	@Autowired
