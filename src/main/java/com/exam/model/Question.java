@@ -22,7 +22,7 @@ public class Question {
     @JsonProperty("correctoption")
     private String correctoption;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "question_id")
     @JsonProperty("options")
     private List<Option> options;
