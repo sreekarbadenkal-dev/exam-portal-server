@@ -2,6 +2,8 @@ package com.exam.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -20,5 +22,6 @@ public class Option {
     
     @ManyToOne
     @JoinColumn(name = "question_id") 
+    @JsonBackReference
     private Question question;
 }

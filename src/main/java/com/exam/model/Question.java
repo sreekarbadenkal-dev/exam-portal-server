@@ -2,6 +2,8 @@ package com.exam.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
@@ -24,5 +26,6 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonProperty("options")
+    @JsonManagedReference
     private List<Option> options;
 }
