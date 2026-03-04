@@ -1,17 +1,16 @@
 package com.exam.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "exams")
-@Data // Generates Getters, Setters, toString, equals, and hashCode
-@NoArgsConstructor // Required by JPA
-@AllArgsConstructor // Useful for testing
+@Data 
+@NoArgsConstructor 
+@AllArgsConstructor 
 public class Exam {
 
     @Id
@@ -29,7 +28,9 @@ public class Exam {
     @Column(name = "department_name")
     private Set<String> department = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "exam_id")
-    private Set<Question> questions = new HashSet<>(); // Change List to Set
+    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Question> questions = new HashSet<>();
 }

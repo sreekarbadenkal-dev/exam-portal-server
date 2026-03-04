@@ -2,7 +2,6 @@ package com.exam.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -20,8 +19,14 @@ public class Option {
     @JsonProperty("text")
     private String text;
     
-    @ManyToOne
+    @Transient // THIS IS THE MAGIC PART
+    @JsonProperty("tempId")
+    private String tempId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id") 
     @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Question question;
 }

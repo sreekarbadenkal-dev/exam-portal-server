@@ -38,6 +38,8 @@ public class StudentController {
 			Student loggedstudent=logingstudent.get();
 			if(loggedstudent.getPassword().equals(password))
 			{
+//				rloggedstudent);eturn ResponseEntity.ok(// Inside your login method, before returning:
+				loggedstudent.setPassword(null); // Wipe password for security
 				return ResponseEntity.ok(loggedstudent);
 			}
 			else {
