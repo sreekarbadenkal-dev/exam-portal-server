@@ -5,7 +5,7 @@ import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@Table(name = "results")
+@Table(name = "results", uniqueConstraints= {@UniqueConstraint (name="uniquekeyconstraint_examid_studentid",columnNames= {"student_id","exam_id"})})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

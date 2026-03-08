@@ -3,12 +3,17 @@ package com.exam.controller;
 import com.exam.model.*;
 import com.exam.dto.*;
 import com.exam.repository.ExamRepository;
+import com.exam.repository.ResultRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,6 +25,8 @@ public class ExamController {
 
     @Autowired
     private ExamRepository examRepository;
+    @Autowired
+    private ResultRepository resultRepository;
 
     /**
      * 1. Admin: Create a new Exam (POST)
@@ -71,21 +78,29 @@ public class ExamController {
     }
 
     // 3. Student Dashboard: Get exams based on Dept/Semester
+    @Transactional(readOnly = true)
     @PostMapping("/studentexampage")	
     public ResponseEntity<?> setStudentsExams(@RequestBody Student student){
-        String dept = student.getDepartment();
-        int semester = student.getSemester();
-        List<Exam> currentexams = examRepository.findByDepartmentAndSemester(dept, semester);
-        
-        if(currentexams.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Exams for Now");
-        }
-        
-        List<StudentExamDTO> dtos = currentexams.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(dtos);
+    	Long sid=student.getId();
+    	String sdept=student.getDepartment();
+    	int ssem=student.getSemester();
+    	
+    	List <Exam> currentexams=examRepository.findPendingExams(sdept, ssem, sid);
+    	List <Result> resultofexams=resultRepository.findByStudentId(sid);
+    	List <StudentExamDTO> pendingexams=new ArrayList<>();
+    	List <ResultDTO> resultlist=new ArrayList<ResultDTO>();
+    	for(Exam exam:currentexams) {
+    		pendingexams.add(convertToDTO(exam));
+    	}
+    	for(Result result:resultofexams) {
+    		resultlist.add(convertToDTO(result));
+    	}
+    	
+    	StudentDashboardDTO studentexaminfo=new StudentDashboardDTO();
+    	studentexaminfo.setAttempted(resultlist);
+    	studentexaminfo.setPending(pendingexams);
+    	
+    	return ResponseEntity.ok(studentexaminfo);
     }
     
     // 4. Exam Page: Get single exam by ID
@@ -128,6 +143,22 @@ public class ExamController {
                 return qDto;
             }).collect(Collectors.toSet()));
         }
+        return dto;
+    }
+    
+    
+    private ResultDTO convertToDTO(Result result) {
+        ResultDTO dto = new ResultDTO();
+        dto.setId(result.getId());
+        dto.setExamTitle(result.getExam().getTitle());
+        dto.setMarksGot(result.getMarksGot());
+
+        // Logic: Convert String to LocalDateTime
+//        String dateStr = result.getSubmittedAt(); // Assuming this returns a String
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        LocalDateTime dateTime = LocalDateTime.parse(dateStr, formatter);
+        dto.setCorrectAnswers(result.getCorrectAnswers());
+        dto.setSubmittedAt(result.getSubmittedAt());
         return dto;
     }
 }

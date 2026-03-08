@@ -1,6 +1,7 @@
 package com.exam.controller;
 
 import com.exam.dto.AnswerSubmissionDTO;
+import com.exam.dto.ResultDTO;
 import com.exam.model.*;
 import com.exam.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,5 +82,28 @@ public class ResultController {
         System.out.println("======================================\n");
         
         return ResponseEntity.ok(savedResult);
+    }
+    
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getResultById(@PathVariable Long id) {
+        System.out.println("Fetching details for Result ID: " + id);
+        
+        Result result = resultRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Result not found"));
+
+        // FIX: Convert to DTO before returning to React
+        return ResponseEntity.ok(convertToDTO(result));
+    }
+
+    // Ensure you have the convertToDTO method in this controller too
+    private ResultDTO convertToDTO(Result result) {
+        ResultDTO dto = new ResultDTO();
+        dto.setId(result.getId());
+        dto.setExamTitle(result.getExamTitle());
+        dto.setMarksGot(result.getMarksGot());
+        dto.setCorrectAnswers(result.getCorrectAnswers());
+        dto.setSubmittedAt(result.getSubmittedAt());
+        return dto;
     }
 }

@@ -9,4 +9,5 @@ import java.util.List;
 public interface ResultRepository extends JpaRepository<Result, Long> {
     // You can add this to find results for a specific student later
     List<Result> findByStudentId(Long studentId);
+    
 }
