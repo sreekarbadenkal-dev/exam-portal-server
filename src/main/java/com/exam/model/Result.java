@@ -2,6 +2,10 @@ package com.exam.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -21,12 +25,16 @@ public class Result {
     private String submittedAt;
 
     // 1. Linking to the Exam
-    @ManyToOne(fetch = FetchType.LAZY) // LAZY because we usually just need the Exam ID, not the whole exam tree again
+    @ManyToOne(fetch = FetchType.EAGER) // updated well now we need it eagerly LAZY because we usually just need the Exam ID, not the whole exam tree again
     @JoinColumn(name = "exam_id")
-    @JsonIgnoreProperties({"questions", "department"}) // Prevents sending the entire question bank inside a result
+    @JsonIgnoreProperties({"department"}) // Prevents sending the entire question bank inside a result
     @ToString.Exclude // Prevents infinite loop in logs
     @EqualsAndHashCode.Exclude
     private Exam exam;
+    
+ // Inside Result.java
+    @OneToMany(mappedBy = "result", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<StudentAnswer> studentAnswers = new ArrayList<>();
 
     // 2. Linking to the Student
     @ManyToOne(fetch = FetchType.LAZY)

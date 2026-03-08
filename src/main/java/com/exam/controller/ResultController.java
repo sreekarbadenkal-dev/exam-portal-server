@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -44,42 +46,49 @@ public class ResultController {
         int totalQuestions = (questions != null) ? questions.size() : 0;
         int score = 0;
 
+        // Initialize Result and the list to hold student choices
+        Result result = new Result();
+        List<StudentAnswer> studentAnswerList = new ArrayList<>();
+
         if (questions != null) {
             for (Question q : questions) {
-                // 2. Direct ID Extraction (No more searching text!)
+                // 2. Extract IDs for grading
                 String studentSelectedId = submission.getSelectedOptions().get(q.getId());
                 String correctIdInDB = q.getCorrectoption();
 
-                System.out.println("[Q ID: " + q.getId() + "] Student picked ID: [" + studentSelectedId + "] | Correct ID: [" + correctIdInDB + "]");
+                // 3. Create StudentAnswer record to track history
+                StudentAnswer sa = new StudentAnswer();
+                sa.setQuestionId(q.getId());
+                // Convert String ID from JSON to Long for Database
+                sa.setSelectedOptionId(studentSelectedId != null ? Long.parseLong(studentSelectedId) : null);
+                sa.setResult(result); // Set bidirectional relationship
+                studentAnswerList.add(sa);
 
-                // 3. Simple ID-to-ID Comparison
+                System.out.println("[Q ID: " + q.getId() + "] Student picked: [" + studentSelectedId + "]");
+
+                // 4. Comparison Logic
                 if (studentSelectedId != null && studentSelectedId.equals(correctIdInDB)) {
                     score++;
-                    System.out.println("-> Result: CORRECT");
-                } else {
-                    System.out.println("-> Result: WRONG");
                 }
             }
         }
 
-        // 4. Construct Result Object
-        Result result = new Result();
+        // 5. Finalize Result Object
         result.setExam(exam);
         result.setStudent(student);
         result.setExamTitle(exam.getTitle());
         result.setCorrectAnswers(totalQuestions); 
         result.setMarksGot(score);
+        result.setStudentAnswers(studentAnswerList); // Link the list to the result
         
-        // Use your preferred date format
         String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         result.setSubmittedAt(currentTime);
 
-        // 5. Finalize
+        // 6. Save (CascadeType.ALL in Result.java handles student_answer inserts)
         Result savedResult = resultRepository.save(result);
         
         System.out.println("========== GRADING COMPLETE ==========");
         System.out.println("STUDENT: " + student.getName() + " | SCORE: " + score + "/" + totalQuestions);
-        System.out.println("======================================\n");
         
         return ResponseEntity.ok(savedResult);
     }
@@ -92,11 +101,9 @@ public class ResultController {
         Result result = resultRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Result not found"));
 
-        // FIX: Convert to DTO before returning to React
         return ResponseEntity.ok(convertToDTO(result));
     }
 
-    // Ensure you have the convertToDTO method in this controller too
     private ResultDTO convertToDTO(Result result) {
         ResultDTO dto = new ResultDTO();
         dto.setId(result.getId());
@@ -104,6 +111,9 @@ public class ResultController {
         dto.setMarksGot(result.getMarksGot());
         dto.setCorrectAnswers(result.getCorrectAnswers());
         dto.setSubmittedAt(result.getSubmittedAt());
+        dto.setExam(result.getExam());
+        // Crucial: Pass the list back so React can show Red/Blue highlights
+        dto.setStudentAnswers(result.getStudentAnswers()); 
         return dto;
     }
 }

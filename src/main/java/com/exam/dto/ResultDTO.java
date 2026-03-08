@@ -1,16 +1,19 @@
 package com.exam.dto;
 
-import lombok.AllArgsConstructor;
+import com.exam.model.Exam;
+import com.exam.model.StudentAnswer;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ResultDTO {
-    private Long id;              // Matches result.id in React
+    private Long id;
     private String examTitle;
-    private int marksGot;
-    private int correctAnswers;   // New field
-    private String submittedAt;   // New field
+    private Integer marksGot;
+    private Integer correctAnswers;
+    private String submittedAt;
+
+    // ADD THESE TWO FIELDS
+    private Exam exam; 
+    private List<StudentAnswer> studentAnswers; 
 }
